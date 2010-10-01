@@ -1,0 +1,14 @@
+This is a Prototype conversion of the jQuery plugin scrollFollow.
+You can find the original script at the following URL
+http://code.google.com/p/jquery-scroll-follow/
+
+I could not find an existing javascript snippet to set up making a DOM Element scroll 
+with the page that worked using Prototype and script.aculo.us so I ended up converting 
+this jQuery snippet.  Most of the functionality has been kept, save for a few things 
+listed below.  
+
+
+Current isues:
+ - The original script including optional functionality for user preference to not scroll and binding to a toggle element to turn the scrolling off, I left this functionality out in favor of getting the core working.
+ - The offset parameter doesn't seem to work correctly, and not at all in Opera.
+ - Probably more...
