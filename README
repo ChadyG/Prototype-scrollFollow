@@ -12,3 +12,6 @@ Current isues:
  - The original script including optional functionality for user preference to not scroll and binding to a toggle element to turn the scrolling off, I left this functionality out in favor of getting the core working.
  - The offset parameter doesn't seem to work correctly, and not at all in Opera.
  - Probably more...
+
+
+Requires Prototype 1.7 (Element.Layout)
