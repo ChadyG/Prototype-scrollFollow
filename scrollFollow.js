@@ -44,7 +44,6 @@ scrollFollow: function ( obj, options )
 		options.relativeTo = options.relativeTo || 'top';
 		options.speed = options.speed || 0.5;
 		options.offset = options.offset || 0;
-		options.easing = options.easing || 'swing';
 		options.container = options.container || $(obj.parentNode).readAttribute( 'id' );
 		options.killSwitch = options.killSwitch || 'killSwitch';
 		options.onText = options.onText || 'Turn Slide Off';
@@ -83,6 +82,30 @@ scrollFollow: function ( obj, options )
 
 Element.addMethods(ScrollFollow);
 
+function killSwitchON(box,options)
+{
+	box.scrollActive = true;
+	$( options.killSwitch ).update( options.onText );
+	$( options.killSwitch ).stopObserving('click');
+	$( options.killSwitch ).observe('click', 
+		function ()
+		{
+			killSwitchOFF(box,options);
+		});
+	ani(box,options);
+}
+function killSwitchOFF(box,options)
+{
+	box.scrollActive = false;
+	$( options.killSwitch ).update( options.offText );
+	$( options.killSwitch ).stopObserving('click');
+	$( options.killSwitch ).observe('click', 
+		function ()
+		{
+			killSwitchON(box,options);
+		});
+}
+
 function scrollFollow( box, options )
 { 
 	// Convert box into a jQuery object
@@ -94,7 +117,7 @@ function scrollFollow( box, options )
 	//FUNCTION ANI
 	
 	// For user-initiated stopping of the slide
-	var isActive = true;
+	box.scrollActive = true;
 	
 	// I don't feel like messing with this right now -Chad
 	//if ( $.cookie != undefined )
@@ -103,63 +126,20 @@ function scrollFollow( box, options )
 	//	{
 	//		var isActive = false;
 	//		
-	//		$( '#' + options.killSwitch ).text( options.offText )
-	//			.toggle( 
+	//		$( options.killSwitch ).update(options.offText )
+	//			.observe('click', 
 	//				function ()
 	//				{
-	//					isActive = true;
-	//					
-	//					$( this ).text( options.onText );
-	//					
-	//					$.cookie( 'scrollFollowSetting' + box.attr( 'id' ), true, { expires: 365, path: '/'} );
-	//					
-	//					ani();
-	//				},
-	//				function ()
-	//				{
-	//					isActive = false;
-	//					
-	//					$( this ).text( options.offText );
-	//					
-	//					box.animate(
-	//						{
-	//							top: box.initialTop
-	//						}, options.speed, options.easing
-	//					);	
-	//					
-	//					$.cookie( 'scrollFollowSetting' + box.attr( 'id' ), false, { expires: 365, path: '/'} );
-	//				}
-	//			);
+	//					killSwitchON(box,options);
+	//				});
 	//	}
 	//	else
 	//	{
-	//		$( '#' + options.killSwitch ).text( options.onText )
-	//			.toggle( 
-	//				function ()
-	//				{
-	//					isActive = false;
-	//					
-	//					$( this ).text( options.offText );
-	//					
-	//					box.animate(
-	//						{
-	//							top: box.initialTop
-	//						}, 0
-	//					);	
-	//					
-	//					$.cookie( 'scrollFollowSetting' + box.attr( 'id' ), false, { expires: 365, path: '/'} );
-	//				},
-	//				function ()
-	//				{
-	//					isActive = true;
-	//					
-	//					$( this ).text( options.onText );
-	//					
-	//					$.cookie( 'scrollFollowSetting' + box.attr( 'id' ), true, { expires: 365, path: '/'} );
-	//					
-	//					ani();
-	//				}
-	//			);
+	$( options.killSwitch ).update( options.onText ).observe('click', 
+		function ()
+		{
+			killSwitchOFF(box, options);
+		});
 	//	}
 	//}
 			
@@ -175,8 +155,10 @@ function scrollFollow( box, options )
 	}
 	
 	// Finds the default positioning of the box.
+	// FIXME: something is wrong with Opera here
+	//		returns a value for top that is inconsistent at dom:loaded from afterwards
 	layout = box.getLayout();
-	box.initialOffsetTop =  parseInt( box.getLayout().get('top') );
+	box.initialOffsetTop = box.cumulativeOffset()['top'];//parseInt( box.getLayout().get('top') );
 	box.initialTop = parseInt( box.getStyle( 'top' ) ) || 0;
 	
 	// Hack to fix different treatment of boxes positioned 'absolute' and 'relative'
@@ -231,7 +213,7 @@ function ani(box, options)
 	var aniTop;
 	
 	// Make sure the user wants the animation to happen
-	if ( true ) //isActive )
+	if ( box.scrollActive ) //isActive )
 	{
 		// If the box should animate relative to the top of the window
 		if ( options.relativeTo == 'top' )
